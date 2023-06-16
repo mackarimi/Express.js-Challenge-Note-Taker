@@ -18,7 +18,7 @@ Note Taker is a web-based application that allows users to write and save notes.
 
 ## Installation
 
-1. Clone the repository: `git clone https://github.com/mackarimi/Express.js-Challenge-Note-Taker`
+1. Clone the repository: `git clone https://github.com/mackarimi/Expressjs-Challenge-Note-Taker`
 2. Install dependencies: `npm install`
 
 ## Usage
