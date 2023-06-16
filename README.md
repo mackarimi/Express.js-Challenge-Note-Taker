@@ -50,4 +50,5 @@ Questions or feedbacks are always welcome and appreciated.💬
 
 ## Deployed
 
-This project is deployed at [].
+This project is deployed at
+[![Deployment](image-2.png)](https://https://github.com/mackarimi/Express.js-Challenge-Note-Taker)

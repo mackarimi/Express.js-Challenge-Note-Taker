@@ -1,67 +1,57 @@
 const express = require('express');
 const fs = require('fs');
-const { v4: uuidv4 } = require('uuid');
+const path = require('path');
 
 const router = express.Router();
 
-// Read all notes from the db.json file
-router.get('/notes', (req, res) => {
-  fs.readFile('./db.json', 'utf8', (err, data) => {
+// Get all notes
+router.get('/', (req, res) => {
+  // Read the db.json file
+  fs.readFile(path.join(__dirname, '..', 'db.json'), 'utf8', (err, data) => {
     if (err) {
       console.error(err);
-      return res.status(500).json({ error: 'Failed to read notes.' });
+      return res.status(500).json({ error: 'Failed to read notes from the database.' });
     }
 
+    // Parse the JSON data
     const notes = JSON.parse(data);
+
+    // Return the notes as JSON
     res.json(notes);
   });
 });
 
-// Save a new note to the db.json file
-router.post('/notes', (req, res) => {
-  const newNote = req.body;
-  newNote.id = uuidv4();
-
-  fs.readFile('./db.json', 'utf8', (err, data) => {
+// Create a new note
+router.post('/', (req, res) => {
+  // Read the db.json file
+  fs.readFile(path.join(__dirname, '..', 'db.json'), 'utf8', (err, data) => {
     if (err) {
       console.error(err);
-      return res.status(500).json({ error: 'Failed to save note.' });
+      return res.status(500).json({ error: 'Failed to read notes from the database.' });
     }
 
+    // Parse the JSON data
     const notes = JSON.parse(data);
+
+    // Generate a unique id for the new note (you can use an npm package like 'uuid' for this)
+    const newNote = {
+      id: uuidv4(),
+      title: req.body.title,
+      text: req.body.text,
+    };
+
+    // Add the new note to the array
     notes.push(newNote);
 
-    fs.writeFile('./db.json', JSON.stringify(notes), (err) => {
+    // Write the updated notes to the db.json file
+    fs.writeFile(path.join(__dirname, '..', 'db.json'), JSON.stringify(notes), (err) => {
       if (err) {
         console.error(err);
-        return res.status(500).json({ error: 'Failed to save note.' });
+        return res.status(500).json({ error: 'Failed to save the note to the database.' });
       }
 
+      // Return the new note as JSON
       res.json(newNote);
-    });
-  });
-});
-
-// Delete a note from the db.json file
-router.delete('/notes/:id', (req, res) => {
-  const id = req.params.id;
-
-  fs.readFile('./db.json', 'utf8', (err, data) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: 'Failed to delete note.' });
-    }
-
-    const notes = JSON.parse(data);
-    const updatedNotes = notes.filter((note) => note.id !== id);
-
-    fs.writeFile('./db.json', JSON.stringify(updatedNotes), (err) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: 'Failed to delete note.' });
-      }
-
-      res.sendStatus(204);
     });
   });
 });
