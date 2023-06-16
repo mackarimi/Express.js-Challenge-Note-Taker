@@ -2,7 +2,7 @@
 
 ## Description
 
-Note Taker is a web-based application that allows users to write and save notes. It provides a simple and intuitive interface for organizing thoughts and keeping track of tasks. The application is built with Express.js, Node.js, and JavaScript. The application is deployed on Heroku.
+Note Taker is a web-based application that allows users to write and save notes. It provides a simple and intuitive interface for organizing thoughts and keeping track of tasks.The application is built with Express.js, Node.js, and JavaScript. The application is deployed on Heroku.
 
 ## Table of Contents
 
