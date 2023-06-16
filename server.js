@@ -1,76 +1,88 @@
-const PORT = process.env.PORT || 3001;
-const fs = require("fs");
-const path = require("path");
-
 const express = require("express");
 const app = express();
+const fs = require("fs");
+const path = require("path");
+const PORT = 3000;
 
-const allNotes = require("./db/db.json");
+const notesFilePath = path.join(__dirname, "data", "notes.json");
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
 app.use(express.static("public"));
+app.use(express.json());
 
-// API Routes
+// Get all notes
 app.get("/api/notes", (req, res) => {
-  res.json(allNotes.slice(1));
-});
-
-// HTML Routes
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/notes.html"));
-});
-
-app.get("/notes", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/notes.html"));
-});
-
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "public/index.html"));
-});
-
-function createNewNote(body, notesArray) {
-  const newNote = body;
-  if (!Array.isArray(notesArray)) notesArray = [];
-  if (notesArray.length === 0) notesArray.push(0);
-  body.id = notesArray[0];
-  notesArray[0]++;
-
-  notesArray.push(newNote);
-  fs.writeFileSync(
-    path.join(__dirname, "./db/db.json"),
-    JSON.stringify(notesArray, null, 2)
-  );
-  return newNote;
-}
-
-// Create New Notes - takes in JSON input
-app.post("/api/notes", (req, res) => {
-  const newNote = createNewNote(req.body, allNotes);
-  res.json(newNote);
-});
-
-function deleteNoteById(id, notesArray) {
-  for (let i = 0; i < notesArray.length; i++) {
-    let note = notesArray[i];
-
-    if (note.id == id) {
-      notesArray.splice(i, 1);
-      fs.writeFileSync(
-        path.join(__dirname, "./db/db.json"),
-        JSON.stringify(notesArray, null, 2)
-      );
-      break;
+  fs.readFile(notesFilePath, "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Failed to retrieve notes" });
     }
-  }
-}
 
-// Delete Notes
+    const notes = JSON.parse(data);
+    res.json(notes);
+  });
+});
+
+// Save a new note
+app.post("/api/notes", (req, res) => {
+  const { title, text } = req.body;
+
+  if (!title || !text) {
+    return res.status(400).json({ error: "Title and text are required" });
+  }
+
+  fs.readFile(notesFilePath, "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Failed to save the note" });
+    }
+
+    const notes = JSON.parse(data);
+    const newNote = { id: Date.now(), title, text };
+    notes.push(newNote);
+
+    fs.writeFile(notesFilePath, JSON.stringify(notes), (err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Failed to save the note" });
+      }
+
+      res.json(newNote);
+    });
+  });
+});
+
+// Delete a note by ID
 app.delete("/api/notes/:id", (req, res) => {
-  deleteNoteById(req.params.id, allNotes);
-  res.json(true);
+  const noteId = parseInt(req.params.id);
+
+  if (isNaN(noteId)) {
+    return res.status(400).json({ error: "Invalid note ID" });
+  }
+
+  fs.readFile(notesFilePath, "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Failed to delete the note" });
+    }
+
+    let notes = JSON.parse(data);
+    const updatedNotes = notes.filter((note) => note.id !== noteId);
+
+    if (notes.length === updatedNotes.length) {
+      return res.status(404).json({ error: "Note not found" });
+    }
+
+    fs.writeFile(notesFilePath, JSON.stringify(updatedNotes), (err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Failed to delete the note" });
+      }
+
+      res.sendStatus(204);
+    });
+  });
 });
 
 app.listen(PORT, () => {
-  console.log(`API server running now on port ${PORT}!`);
+  console.log(`Server is running on port ${PORT}`);
 });
