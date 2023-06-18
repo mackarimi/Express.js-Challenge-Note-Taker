@@ -2,19 +2,29 @@ const express = require("express");
 const app = express();
 const fs = require("fs");
 const path = require("path");
-const PORT = 3000;
 
-const notesFilePath = path.join(__dirname, "data", "notes.json");
+const PORT = process.env.PORT || 3001;
+const notesFilePath = path.join(__dirname, "notes.json");
 
-app.use(express.static("public"));
+// Middleware for parsing JSON and urlencoded form data
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static("public"));
 
-// Get all notes
+// Routes
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "/public/index.html"));
+});
+
+app.get("/notes", (req, res) => {
+  res.sendFile(path.join(__dirname, "/public/notes.html"));
+});
+
 app.get("/api/notes", (req, res) => {
   fs.readFile(notesFilePath, "utf8", (err, data) => {
     if (err) {
       console.error(err);
-      return res.status(500).json({ error: "Failed to retrieve notes" });
+      return res.status(500).json({ error: "Failed to read the notes" });
     }
 
     const notes = JSON.parse(data);
@@ -22,67 +32,37 @@ app.get("/api/notes", (req, res) => {
   });
 });
 
-// Save a new note
-app.post("/api/notes", (req, res) => {
-  const { title, text } = req.body;
-
-  if (!title || !text) {
-    return res.status(400).json({ error: "Title and text are required" });
-  }
-
-  fs.readFile(notesFilePath, "utf8", (err, data) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: "Failed to save the note" });
-    }
-
-    const notes = JSON.parse(data);
-    const newNote = { id: Date.now(), title, text };
-    notes.push(newNote);
-
-    fs.writeFile(notesFilePath, JSON.stringify(notes), (err) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: "Failed to save the note" });
-      }
-
-      res.json(newNote);
-    });
-  });
-});
-
-// Delete a note by ID
 app.delete("/api/notes/:id", (req, res) => {
-  const noteId = parseInt(req.params.id);
-
-  if (isNaN(noteId)) {
-    return res.status(400).json({ error: "Invalid note ID" });
-  }
+  const noteId = req.params.id;
 
   fs.readFile(notesFilePath, "utf8", (err, data) => {
     if (err) {
       console.error(err);
-      return res.status(500).json({ error: "Failed to delete the note" });
+      return res.status(500).json({ error: "Failed to read the notes" });
     }
 
     let notes = JSON.parse(data);
-    const updatedNotes = notes.filter((note) => note.id !== noteId);
 
-    if (notes.length === updatedNotes.length) {
+    const noteIndex = notes.findIndex((note) => note.id === noteId);
+
+    if (noteIndex === -1) {
       return res.status(404).json({ error: "Note not found" });
     }
 
-    fs.writeFile(notesFilePath, JSON.stringify(updatedNotes), (err) => {
+    notes.splice(noteIndex, 1);
+
+    fs.writeFile(notesFilePath, JSON.stringify(notes), (err) => {
       if (err) {
         console.error(err);
         return res.status(500).json({ error: "Failed to delete the note" });
       }
 
-      res.sendStatus(204);
+      res.json({ message: "Note deleted successfully" });
     });
   });
 });
 
+// Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
