@@ -42,13 +42,13 @@ This project is licensed under the None license.
 
 Questions or feedbacks are always welcome and appreciated.💬
 
-[![Email](image.png)](mailto:karimiabdolkarim0@gmail.com)
+[![Email](/image_icons8/image.png)](mailto:karimiabdolkarim0@gmail.com)
 
 ## GitHub 💻
 
-[![Github](image-1.png)](https://github.com/mackarimi/)
+[![Github](/image_icons8/image-1.png)](https://github.com/mackarimi/)
 
 ## Deployed
 
 This project is deployed at
-[![Deployment](image-2.png)](https://https://github.com/mackarimi/Express.js-Challenge-Note-Taker)
+[![Deployment](/image_icons8/image-2.png)](https://https://github.com/mackarimi/Express.js-Challenge-Note-Taker)
