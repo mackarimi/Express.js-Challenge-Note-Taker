@@ -1,52 +1,27 @@
-const express = require("express");
-const router = express.Router();
-const path = require("path");
-const fs = require("fs");
+const express = require('express');
+const apiRouter = express.Router();
+const fs = require('fs');
+const path = require('path');
+const { v4: uuidv4 } = require('uuid');
 
-const notesFilePath = path.join(__dirname, "../notes.json");
-
-// GET Route for retrieving all notes
-router.get("/notes", (req, res) => {
-  fs.readFile(notesFilePath, "utf8", (err, data) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: "Failed to read the notes" });
-    }
-
-    const notes = JSON.parse(data);
-    res.json(notes);
-  });
+apiRouter.get('/notes', (req, res) => {
+  let data = fs.readFileSync(path.join(__dirname, '..', '/develop/db/db.json'));
+  res.json(JSON.parse(data));
 });
 
-// DELETE Route for deleting a note by ID
-router.delete("/notes/:id", (req, res) => {
-  const noteId = req.params.id;
-
-  fs.readFile(notesFilePath, "utf8", (err, data) => {
-    if (err) {
-      console.error(err);
-      return res.status(500).json({ error: "Failed to read the notes" });
-    }
-
-    let notes = JSON.parse(data);
-
-    const noteIndex = notes.findIndex((note) => note.id === noteId);
-
-    if (noteIndex === -1) {
-      return res.status(404).json({ error: "Note not found" });
-    }
-
-    notes.splice(noteIndex, 1);
-
-    fs.writeFile(notesFilePath, JSON.stringify(notes), (err) => {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: "Failed to delete the note" });
-      }
-
-      res.json({ message: "Note deleted successfully" });
-    });
-  });
+apiRouter.post('/notes', (req, res) => {
+  let notes = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '/develop/db/db.json'), 'utf8'));
+  let newNote = { id: uuidv4(), ...req.body };
+  notes.push(newNote);
+  fs.writeFileSync(path.join(__dirname, '..', '/develop/db/db.json'), JSON.stringify(notes));
+  res.json(newNote);
 });
 
-module.exports = router;
+apiRouter.delete('/notes/:id', (req, res) => {
+  let notes = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '/develop/db/db.json')));
+  notes = notes.filter((note) => note.id !== req.params.id);
+  fs.writeFileSync(path.join(__dirname, '..', '/develop/db/db.json'), JSON.stringify(notes));
+  res.json({ message: `Note with id: ${req.params.id} deleted.` });
+});
+
+module.exports = apiRouter;
