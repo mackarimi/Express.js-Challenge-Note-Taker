@@ -1,18 +1,17 @@
 const express = require("express");
 const router = express.Router();
 const path = require("path");
+const fs = require("fs");
 
-// GET Route for notes page
-router.get("/notes", (res) => {
-    res.sendFile(path.join(__dirname, "../public/notes.html"));
-  });
-  
+// GET Route for the homepage
+router.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../public/index.html"));
+});
 
-// GET Route for notes page
+// GET Route for the notes page
 router.get("/notes", (req, res) => {
-    // Use the req object if needed
-    console.log(req.headers);
-    res.sendFile(path.join(__dirname, "../public/notes.html"));
-  });
-  
+  res.sendFile(path.join(__dirname, "../public/notes.html"));
+});
+
 module.exports = router;
+ 

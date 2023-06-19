@@ -1,20 +1,52 @@
 const express = require("express");
 const router = express.Router();
+const path = require("path");
 const fs = require("fs");
 
-// GET Route for retrieving all the notes
+const notesFilePath = path.join(__dirname, "../notes.json");
+
+// GET Route for retrieving all notes
 router.get("/notes", (req, res) => {
-  // Read the notes data from the file
-  // Handle errors, parse data, and send the response
+  fs.readFile(notesFilePath, "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Failed to read the notes" });
+    }
+
+    const notes = JSON.parse(data);
+    res.json(notes);
+  });
 });
 
 // DELETE Route for deleting a note by ID
 router.delete("/notes/:id", (req, res) => {
-  // Retrieve the note ID from request parameters
-  // Read the notes data from the file
-  // Find the note by ID, remove it, and update the file
-  // Handle errors and send the appropriate response
-});
+  const noteId = req.params.id;
 
+  fs.readFile(notesFilePath, "utf8", (err, data) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: "Failed to read the notes" });
+    }
+
+    let notes = JSON.parse(data);
+
+    const noteIndex = notes.findIndex((note) => note.id === noteId);
+
+    if (noteIndex === -1) {
+      return res.status(404).json({ error: "Note not found" });
+    }
+
+    notes.splice(noteIndex, 1);
+
+    fs.writeFile(notesFilePath, JSON.stringify(notes), (err) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Failed to delete the note" });
+      }
+
+      res.json({ message: "Note deleted successfully" });
+    });
+  });
+});
 
 module.exports = router;
