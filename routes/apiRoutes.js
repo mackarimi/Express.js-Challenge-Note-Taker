@@ -98,7 +98,7 @@ router.delete('/notes/:id', (req, res) => {
         return;
       }
 
-      // Send the deleted note as the response
+      // Send the deleted note as the response 
       res.json(deletedNote);
     });
   });
