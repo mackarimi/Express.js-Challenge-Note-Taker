@@ -4,7 +4,7 @@ const fs = require("fs");
 const path = require("path");
 const { v4: uuidv4 } = require('uuid');
 
-const dbPath = path.join(__dirname, "..", "db", "db.json");
+const dbPath = path.join(__dirname, "..", "/Develop/db/db.json");
 
 // Handle GET request to retrieve notes
 router.get('/notes', (req, res) => {
@@ -98,7 +98,7 @@ router.delete('/notes/:id', (req, res) => {
         return;
       }
 
-      // Send the deleted note as the response 
+      // Send the deleted note as the response
       res.json(deletedNote);
     });
   });
